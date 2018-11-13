@@ -36,7 +36,7 @@ def generateVOC2Json(rootDir,xmlFiles):
 				#image_id = image_id + 1
 				annotation_path = os.path.abspath(os.path.join(root, file))
 				
-				#tree = ET.parse(annotation_path)#.getroot()
+				tree = ET.parse(annotation_path)
 				image = dict()
 				#keyList = list()
 				doc = xmltodict.parse(open(annotation_path).read())
@@ -65,20 +65,21 @@ def generateVOC2Json(rootDir,xmlFiles):
 				#annotation = dict()
 				id1 = 1
 				if 'object' in doc['annotation']:
-					for obj in doc['annotation']['object']:
+					for obj tree.findall('object'):
 						for value in attrDict["categories"]:
 							annotation = dict()
 							#if str(obj['name']) in value["name"]:
-							if str(obj['name']) == value["name"]:
+							if obj.find('name').text == value["name"]:
 								#print str(obj['name'])
 								#annotation["segmentation"] = []
 								annotation["iscrowd"] = 0
 								#annotation["image_id"] = str(doc['annotation']['filename']).split('.jpg')[0] #attrDict["images"]["id"]
 								annotation["image_id"] = image_id
-								x1 = int(obj["bndbox"]["xmin"])  - 1
-								y1 = int(obj["bndbox"]["ymin"]) - 1
-								x2 = int(obj["bndbox"]["xmax"]) - x1
-								y2 = int(obj["bndbox"]["ymax"]) - y1
+								bnd=obj.find('bndbox')
+								x1 = int(bnd.find('xmin').text)  - 1
+								y1 = int(bnd.find('ymin').text) - 1
+								x2 = int(bnd.find('xmax').text) - x1
+								y2 = int(bnd.find('ymax').text) - y1
 								annotation["bbox"] = [x1, y1, x2, y2]
 								annotation["area"] = float(x2 * y2)
 								annotation["category_id"] = value["id"]
@@ -113,7 +114,7 @@ def generateVOC2Json(rootDir,xmlFiles):
 # 			annotation_path = str(os.path.abspath(os.path.join(root,file)))
 # 			#print(annotation_path)
 # 			generateVOC2Json(annotation_path)
-trainFile = "/netscratch/pramanik/OBJECT_DETECTION/valid.txt"
+trainFile = "./train.txt"
 trainXMLFiles = list()
 with open(trainFile, "rb") as f:
 	for line in f:
@@ -122,5 +123,5 @@ with open(trainFile, "rb") as f:
 		trainXMLFiles.append(fileName + ".xml")
 
 
-rootDir = "/netscratch/pramanik/OBJECT_DETECTION/detectron_old/lib/datasets/data/Receipts/Annotations_xml"
+rootDir = "./Annotations"
 generateVOC2Json(rootDir, trainXMLFiles)
